@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { getAllBooks } from "../storage/booksDB"
+import { getAllBooks, saveBook, deleteBook } from "../storage/booksDB"
+import BookMenu from "./BookMenu"
 
 const gradients = [
   "linear-gradient(135deg,#FF6B6B,#C44AFF)",
@@ -22,8 +23,20 @@ function BooksGrid() {
   const [books, setBooks] = useState([])
 
   useEffect(() => {
-    getAllBooks().then(setBooks)
+    getAllBooks().then((all) => setBooks(all.filter((b) => !b.hidden)))
   }, [])
+
+  function handleHide(book) {
+    saveBook({ ...book, hidden: true }).then(() => {
+      setBooks((prev) => prev.filter((b) => b.id !== book.id))
+    })
+  }
+
+  function handleDelete(book) {
+    deleteBook(book.id).then(() => {
+      setBooks((prev) => prev.filter((b) => b.id !== book.id))
+    })
+  }
 
   return (
     <section className="books-grid">
@@ -46,6 +59,7 @@ function BooksGrid() {
                 <div className="book-card-badge">{book.progress}%</div>
               )}
             </div>
+            <BookMenu book={book} onHide={handleHide} onDelete={handleDelete} />
             <p className="book-card-title">{book.title}</p>
             <p className="book-card-author">{book.authors?.join(", ") || ""}</p>
           </div>
