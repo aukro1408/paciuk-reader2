@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { getAllBooks } from "../storage/booksDB"
 import { getPageContent, getTotalChars } from "../engine/pagination"
 import { ArrowLeft } from "lucide-react"
@@ -30,6 +30,7 @@ function renderParagraph(para, i) {
 function ReaderPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [book, setBook] = useState(null)
   const [pageItems, setPageItems] = useState([])
   const [currentOffset, setCurrentOffset] = useState(0)
@@ -41,6 +42,7 @@ function ReaderPage() {
   const readerRef = useRef(null)
   const touchX = useRef(null)
   const touchStartX = useRef(null)
+  const charsPerPageRef = useRef(0)
 
   const loadPage = useCallback((bookData, fromChar) => {
     const el = readerRef.current
@@ -51,6 +53,8 @@ function ReaderPage() {
     setPageItems(content.items)
     setCurrentOffset(fromChar)
     setNextOffset(content.nextChar)
+    const consumed = content.nextChar - fromChar
+    if (consumed > 0) charsPerPageRef.current = consumed
 
   }, [])
 
@@ -66,10 +70,50 @@ function ReaderPage() {
   }, [id])
 
   useEffect(() => {
-    if (book && readerRef.current) {
-      loadPage(book, 0)
+    if (!book || !readerRef.current) return
+
+    const navPage = location.state?.startPage
+    if (navPage && navPage > 1 && totalChars > 0) {
+      try {
+        const raw = localStorage.getItem(`reading_progress_${id}`)
+        if (raw) {
+          const { totalPages } = JSON.parse(raw)
+          if (totalPages > 0) {
+            const cpp = totalChars / totalPages
+            const offset = Math.round((navPage - 1) * cpp)
+            loadPage(book, Math.min(offset, totalChars - 1))
+            return
+          }
+        }
+      } catch {}
     }
-  }, [book, loadPage])
+
+    try {
+      const raw = localStorage.getItem(`reading_progress_${id}`)
+      if (raw) {
+        const { currentPage, totalPages } = JSON.parse(raw)
+        if (currentPage > 1 && totalPages > 0 && totalChars > 0) {
+          const cpp = totalChars / totalPages
+          const offset = Math.round((currentPage - 1) * cpp)
+          loadPage(book, Math.min(offset, totalChars - 1))
+          return
+        }
+      }
+    } catch {}
+
+    loadPage(book, 0)
+  }, [book, loadPage, location.state, id, totalChars])
+
+  useEffect(() => {
+    if (!book || totalChars === 0) return
+    const cpp = charsPerPageRef.current
+    if (!cpp) return
+    const page = Math.floor(currentOffset / cpp) + 1
+    const totalPages = Math.max(1, Math.ceil(totalChars / cpp))
+    try {
+      localStorage.setItem(`reading_progress_${id}`, JSON.stringify({ currentPage: page, totalPages }))
+    } catch {}
+  }, [currentOffset, book, id, totalChars])
 
   const goNext = useCallback(() => {
     if (!book || nextOffset >= totalChars) return
@@ -118,7 +162,9 @@ function ReaderPage() {
     )
   }
 
-  const pageNum = totalChars > 0 ? Math.floor((currentOffset / totalChars) * 100) + 1 : 1
+  const cpp = charsPerPageRef.current || totalChars
+  const currentPageNum = cpp > 0 ? Math.floor(currentOffset / cpp) + 1 : 1
+  const totalPagesNum = cpp > 0 ? Math.max(1, Math.ceil(totalChars / cpp)) : 1
 
   return (
     <div className="reader-page"
@@ -136,22 +182,11 @@ function ReaderPage() {
         {pageItems.map((item, index) => renderParagraph(item, index))}
       </div>
 
-      <div className={`reader-footer ${uiVisible ? "" : "reader-footer--hidden"}`}>
-        <button
-          className="reader-nav-btn"
-          disabled={offsetStack.current.length === 0}
-          onClick={(e) => { e.stopPropagation(); goPrev() }}
-        >
-          ← Previous
-        </button>
-        <span className="reader-page-num">~{pageNum}%</span>
-        <button
-          className="reader-nav-btn"
-          disabled={nextOffset >= totalChars}
-          onClick={(e) => { e.stopPropagation(); goNext() }}
-        >
-          Next →
-        </button>
+      <div className={`reader-bottom-panel ${uiVisible ? "" : "reader-bottom-panel--hidden"}`}>
+        <div className="reader-bottom-progress-bar">
+          <div className="reader-bottom-progress-fill" style={{ width: `${(currentOffset / totalChars) * 100}%` }} />
+        </div>
+        <p className="reader-bottom-text">Страница {currentPageNum} из {totalPagesNum}</p>
       </div>
     </div>
   )

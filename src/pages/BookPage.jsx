@@ -7,6 +7,7 @@ function BookPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [book, setBook] = useState(null)
+  const [savedProgress, setSavedProgress] = useState(null)
 
   useEffect(() => {
     getAllBooks().then((books) => {
@@ -14,6 +15,22 @@ function BookPage() {
       setBook(found || null)
     })
   }, [id])
+
+  useEffect(() => {
+    if (!book) return
+    try {
+      const raw = localStorage.getItem(`reading_progress_${id}`)
+      if (raw) setSavedProgress(JSON.parse(raw))
+      else setSavedProgress(null)
+    } catch {
+      setSavedProgress(null)
+    }
+  }, [book, id])
+
+  const progressPercent = savedProgress
+    ? Math.round((savedProgress.currentPage / savedProgress.totalPages) * 100)
+    : 0
+  const startPage = savedProgress?.currentPage || 1
 
   if (!book) {
     return (
@@ -34,7 +51,7 @@ function BookPage() {
         }
       >
         <div className="book-page-cover-overlay" />
-        <button className="book-page-back" onClick={() => navigate(-1)}>
+        <button className="book-page-back" onClick={() => navigate("/")}>
           <ArrowLeft size={24} />
         </button>
         <button className="book-page-fav">
@@ -72,12 +89,12 @@ function BookPage() {
                 fill="none"
                 stroke="#4A7BFF"
                 strokeWidth="4"
-                strokeDasharray={`${(book.progress / 100) * 138} 138`}
+                strokeDasharray={`${(progressPercent / 100) * 138} 138`}
                 strokeLinecap="round"
                 transform="rotate(-90 26 26)"
               />
             </svg>
-            <span className="book-page-progress-text">{book.progress}%</span>
+            <span className="book-page-progress-text">{progressPercent}%</span>
           </div>
         </div>
 
@@ -86,7 +103,7 @@ function BookPage() {
           <p className="book-page-desc-text">{book.description || "Описание отсутствует"}</p>
         </div>
 
-        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`)}>Продолжить чтение</button>
+        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`, { state: { startPage } })}>Продолжить чтение</button>
       </div>
     </div>
   )
