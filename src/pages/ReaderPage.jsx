@@ -37,6 +37,10 @@ function ReaderPage() {
   const [nextOffset, setNextOffset] = useState(0)
   const [totalChars, setTotalChars] = useState(0)
   const [uiVisible, setUiVisible] = useState(true)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [animDirection, setAnimDirection] = useState(null)
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
 
   const offsetStack = useRef([])
   const readerRef = useRef(null)
@@ -127,9 +131,31 @@ function ReaderPage() {
     loadPage(book, prev)
   }, [book, loadPage])
 
+  const animateTo = useCallback((direction) => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setAnimDirection(direction)
+    setDragX(0)
+
+    setTimeout(() => {
+      if (direction === 'left') goNext()
+      else goPrev()
+      setIsAnimating(false)
+      setAnimDirection(null)
+    }, 350)
+  }, [isAnimating, goNext, goPrev])
+
   function handleTouchStart(e) {
     touchX.current = e.touches[0].clientX
     touchStartX.current = e.touches[0].clientX
+    setDragX(0)
+    setIsDragging(true)
+  }
+
+  function handleTouchMove(e) {
+    if (!touchStartX.current) return
+    const currentX = e.touches[0].clientX
+    setDragX(currentX - touchStartX.current)
   }
 
   function handleTouchEnd(e) {
@@ -138,17 +164,20 @@ function ReaderPage() {
     const startX = touchStartX.current
     const screenW = window.innerWidth
 
-    if (Math.abs(dx) > 50) {
-      if (dx < 0) goNext()
-      else goPrev()
+    setIsDragging(false)
+    setDragX(0)
+
+    if (Math.abs(dx) > 60) {
+      if (dx < 0) animateTo('left')
+      else animateTo('right')
       return
     }
 
     const relX = startX / screenW
     if (relX < 0.33) {
-      goPrev()
+      animateTo('right')
     } else if (relX > 0.66) {
-      goNext()
+      animateTo('left')
     } else {
       setUiVisible((v) => !v)
     }
@@ -166,9 +195,20 @@ function ReaderPage() {
   const currentPageNum = cpp > 0 ? Math.floor(currentOffset / cpp) + 1 : 1
   const totalPagesNum = cpp > 0 ? Math.max(1, Math.ceil(totalChars / cpp)) : 1
 
+  const pageTransform = isAnimating
+    ? `translateX(${animDirection === 'left' ? -40 : 40}px) scale(0.97)`
+    : isDragging
+      ? `translateX(${dragX * 0.3}px)`
+      : 'none'
+
+  const pageTransition = isDragging
+    ? 'none'
+    : 'transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease'
+
   return (
     <div className="reader-page"
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       <div className={`reader-header ${uiVisible ? "" : "reader-header--hidden"}`}>
@@ -179,7 +219,13 @@ function ReaderPage() {
       </div>
 
       <div className="reader-content" ref={readerRef}>
-        {pageItems.map((item, index) => renderParagraph(item, index))}
+        <div className="reader-page-anim" style={{
+          transform: pageTransform,
+          opacity: isAnimating ? 0 : 1,
+          transition: pageTransition
+        }}>
+          {pageItems.map((item, index) => renderParagraph(item, index))}
+        </div>
       </div>
 
       <div className={`reader-bottom-panel ${uiVisible ? "" : "reader-bottom-panel--hidden"}`}>

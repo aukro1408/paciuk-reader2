@@ -6,7 +6,7 @@
 
 body{
   font-family: Arial, sans-serif;
-  background:#F7F5F1;
+  background:#FAFAFC;
 }
 
 #root{
@@ -14,6 +14,7 @@ body{
   margin:auto;
   min-height:100dvh;
   overflow:hidden;
+  background:#FAFAFC;
 }
 
 .app{
@@ -89,8 +90,31 @@ p{
   background:white;
   padding:18px;
   border-radius:18px;
-  color:#999;
   box-shadow:0 4px 20px rgba(0,0,0,0.04);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search-icon{
+  color:#8A8A8E;
+  flex-shrink:0;
+}
+
+.search-input{
+  flex:1;
+  border:none;
+  outline:none;
+  background:none;
+  font-size:16px;
+  color:#333;
+  font-family:inherit;
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+.search-input::placeholder{
+  color:#8A8A8E;
 }
 
 .reading-card{
@@ -357,7 +381,7 @@ p{
 
 .book-page{
   min-height:100dvh;
-  background:#F8F8F5;
+  background:#FAFAFC;
   padding-bottom:24px;
 }
 
@@ -371,20 +395,30 @@ p{
 .book-page-cover-section{
   position:relative;
   height:320px;
+  width:100%;
   background-size:cover;
   background-position:center;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
+  border-bottom-left-radius:32px;
+  border-bottom-right-radius:32px;
+}
+
+.book-page-cover-bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  filter:blur(8px);
+  transform:scale(1.15);
 }
 
 .book-page-cover-overlay{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.45);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
 }
 
 .book-page-back{
@@ -440,6 +474,7 @@ p{
   margin-top:-20px;
   position:relative;
   z-index:2;
+  text-align:center;
 }
 
 .book-page-title{
@@ -448,6 +483,7 @@ p{
   color:#1a1a1a;
   margin:0;
   line-height:1.2;
+  text-align:center;
 }
 
 .book-page-author{
@@ -455,14 +491,15 @@ p{
   color:#888;
   margin:0;
   margin-top:4px;
+  text-align:center;
 }
 
 .book-page-pages{
   display:inline-block;
   margin-top:8px;
   font-size:13px;
-  color:#aaa;
-  background:#f0f0f0;
+  color:#4C78FF;
+  background:#EEF4FF;
   padding:4px 12px;
   border-radius:20px;
 }
@@ -515,6 +552,7 @@ p{
 
 .book-page-desc{
   margin-top:24px;
+  text-align:left;
 }
 
 .book-page-desc-title{
@@ -619,6 +657,7 @@ p{
   margin:auto;
   width:100%;
   overflow-y:auto;
+  overflow-x:hidden;
   box-sizing:border-box;
 }
 
@@ -662,6 +701,11 @@ p{
   font-size:13px;
   color:#999;
   margin:8px 0 4px;
+}
+
+.reader-page-anim{
+  width:100%;
+  will-change:transform,opacity;
 }
 
 .reader-chapter{

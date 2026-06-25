@@ -1,3 +1,5 @@
+import { Search } from "lucide-react"
+
 function Header() {
   return (
     <header className="header">
@@ -11,7 +13,8 @@ function Header() {
       </div>
 
       <div className="search-box">
-        Search books...
+        <Search size={18} className="search-icon" />
+        <input type="search" placeholder="Поиск книги..." className="search-input" />
       </div>
 
     </header>

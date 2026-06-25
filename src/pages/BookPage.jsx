@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAllBooks } from "../storage/booksDB"
-import { ArrowLeft, Heart } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 
 function BookPage() {
   const { id } = useParams()
@@ -45,17 +45,13 @@ function BookPage() {
       <div
         className="book-page-cover-section"
         style={
-          book.coverImage
-            ? { backgroundImage: `url(${book.coverImage})` }
-            : { background: "linear-gradient(135deg,#7B61FF,#5B8DFF)" }
+          !book.coverImage ? { background: "linear-gradient(135deg,#7B61FF,#5B8DFF)" } : {}
         }
       >
+        {book.coverImage && <div className="book-page-cover-bg" style={{ backgroundImage: `url(${book.coverImage})` }} />}
         <div className="book-page-cover-overlay" />
         <button className="book-page-back" onClick={() => navigate("/")}>
           <ArrowLeft size={24} />
-        </button>
-        <button className="book-page-fav">
-          <Heart size={24} />
         </button>
         <div className="book-page-cover-wrapper">
           <div
