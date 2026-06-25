@@ -1,4 +1,4 @@
-import { Search } from "lucide-react"
+import SearchBar from "./SearchBar"
 
 function Header() {
   return (
@@ -12,10 +12,7 @@ function Header() {
         </div>
       </div>
 
-      <div className="search-box">
-        <Search size={18} className="search-icon" />
-        <input type="search" placeholder="Поиск книги..." className="search-input" />
-      </div>
+      <SearchBar />
 
     </header>
   )
