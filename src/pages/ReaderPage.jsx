@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { getAllBooks } from "../storage/booksDB"
+import { getAllBooks, saveBook } from "../storage/booksDB"
 import { getPageContent, getTotalChars } from "../engine/pagination"
 import { ArrowLeft } from "lucide-react"
 
@@ -69,6 +69,10 @@ function ReaderPage() {
       if (found) {
         const total = getTotalChars(found)
         setTotalChars(total)
+        localStorage.setItem("lastOpenedBookId", id)
+        if (!found.hasStartedReading) {
+          saveBook({ ...found, hasStartedReading: true })
+        }
       }
     })
   }, [id])
