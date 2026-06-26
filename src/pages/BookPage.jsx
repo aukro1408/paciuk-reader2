@@ -70,6 +70,8 @@ function BookPage() {
         <p className="book-page-author">{book.authors?.[0] || ""}</p>
         <span className="book-page-pages">398 стр</span>
 
+        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`, { state: { startPage } })}>Продолжить чтение</button>
+
         <div className="book-page-progress">
           <div className="book-page-progress-left">
             <p className="book-page-progress-label">Прогресс чтения</p>
@@ -98,8 +100,6 @@ function BookPage() {
           <h3 className="book-page-desc-title">Описание</h3>
           <p className="book-page-desc-text">{book.description || "Описание отсутствует"}</p>
         </div>
-
-        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`, { state: { startPage } })}>Продолжить чтение</button>
       </div>
     </div>
   )
