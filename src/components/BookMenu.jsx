@@ -3,8 +3,6 @@ import { useState, useRef, useEffect } from "react"
 function BookMenu({ book, onHide, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [popupPos, setPopupPos] = useState({ top: 0, right: 0 })
-  const popupRef = useRef(null)
   const btnRef = useRef(null)
 
   useEffect(() => {
@@ -25,53 +23,14 @@ function BookMenu({ book, onHide, onDelete }) {
     }
   }, [])
 
-  useEffect(() => {
-    const popup = popupRef.current
-    function stopNative(e) {
-      e.stopPropagation()
-    }
-    const opts = { passive: true }
-    if (popup && menuOpen) {
-      popup.addEventListener("touchstart", stopNative, opts)
-      popup.addEventListener("pointerdown", stopNative, opts)
-    }
-    return () => {
-      if (popup) {
-        popup.removeEventListener("touchstart", stopNative, opts)
-        popup.removeEventListener("pointerdown", stopNative, opts)
-      }
-    }
-  }, [menuOpen])
-
-  useEffect(() => {
-    function handleClick(e) {
-      if (e.target.closest(".book-card-menu-btn")) return
-      if (popupRef.current && !popupRef.current.contains(e.target)) {
-        setMenuOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
+  function handleBackdropClick(e) {
+    e.stopPropagation()
+    setMenuOpen(false)
+  }
 
   function handleMenuToggle(e) {
     e.stopPropagation()
     e.nativeEvent?.stopImmediatePropagation?.()
-    if (!menuOpen) {
-      const rect = btnRef.current.getBoundingClientRect()
-      const gap = 4
-      let top = rect.bottom + gap
-      let right = window.innerWidth - rect.right
-
-      if (top + 100 > window.innerHeight) {
-        top = rect.top - 100 - gap
-      }
-      if (right + 190 > window.innerWidth) {
-        right = 8
-      }
-
-      setPopupPos({ top, right })
-    }
     setMenuOpen((v) => !v)
   }
 
@@ -112,28 +71,22 @@ function BookMenu({ book, onHide, onDelete }) {
         onTouchStart={stopProp}
         onPointerDown={stopProp}
       >
-        ⋯
+        ⋮
       </button>
 
       {menuOpen && (
-        <div
-          className="book-card-menu-popup"
-          ref={popupRef}
-          style={{ top: popupPos.top, right: popupPos.right }}
-          onMouseDown={stopProp}
-          onTouchStart={stopProp}
-          onTouchEnd={stopProp}
-          onPointerDown={stopProp}
-          onPointerUp={stopProp}
-          onClick={stopProp}
-        >
-          <div className="book-card-menu-item" onClick={handleHide}>
-            Убрать с полки
+        <>
+          <div className="book-menu-backdrop" onClick={handleBackdropClick} />
+          <div className="book-bottom-sheet" onClick={stopProp}>
+            <div className="book-bottom-sheet-handle" />
+            <div className="book-bottom-sheet-btn" onClick={handleHide}>
+              Убрать с полки
+            </div>
+            <div className="book-bottom-sheet-btn book-bottom-sheet-btn--danger" onClick={handleDeleteClick}>
+              Удалить с устройства
+            </div>
           </div>
-          <div className="book-card-menu-item book-card-menu-item--danger" onClick={handleDeleteClick}>
-            Удалить с устройства
-          </div>
-        </div>
+        </>
       )}
 
       {confirmOpen && (
