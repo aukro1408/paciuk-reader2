@@ -1,3 +1,9 @@
+const FONT_MAP = {
+  georgia: "'Georgia','Times New Roman',serif",
+  ebGaramond: "'EB Garamond','Garamond',serif",
+  arial: "Arial,'Helvetica Neue',sans-serif",
+}
+
 const STYLES = {
   container: {
     padding: "24px 20px",
@@ -8,7 +14,7 @@ const STYLES = {
     top: "-9999px",
     left: "-9999px",
     width: "430px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: FONT_MAP.georgia,
     fontSize: "16px",
     lineHeight: "1.7",
     color: "#333",
@@ -80,9 +86,15 @@ function buildItemList(book) {
   return items
 }
 
-function createElement(para) {
+function createElement(para, fontSize, lineHeight) {
   const el = document.createElement("div")
-  const style = STYLES[para.type] || STYLES.p
+  const base = STYLES[para.type] || STYLES.p
+  const style = {}
+  Object.assign(style, base)
+  if (para.type === "p") {
+    style.fontSize = fontSize
+    style.lineHeight = lineHeight
+  }
   Object.assign(el.style, style)
   el.textContent = para.content
   return el
@@ -122,10 +134,11 @@ export function getTotalChars(book) {
   return total
 }
 
-export function getPageContent(book, fromChar, viewportHeight) {
+export function getPageContent(book, fromChar, viewportHeight, fontFamily, paraFontSize, paraLineHeight) {
   const items = buildItemList(book)
   const container = getContainer()
   container.style.height = viewportHeight + "px"
+  container.style.fontFamily = FONT_MAP[fontFamily] || FONT_MAP.georgia
   container.innerHTML = ""
 
   const start = offsetToItem(items, fromChar)
@@ -144,7 +157,7 @@ export function getPageContent(book, fromChar, viewportHeight) {
       text = text.substring(start.skipChars)
     }
 
-    const el = createElement({ type: item.type, content: text })
+    const el = createElement({ type: item.type, content: text }, paraFontSize, paraLineHeight)
     container.appendChild(el)
 
     if (container.scrollHeight <= container.clientHeight) {

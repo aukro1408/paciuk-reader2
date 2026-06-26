@@ -48,6 +48,17 @@ function ReaderPage() {
   const [nightMode, setNightMode] = useState(() => {
     try { return localStorage.getItem("nightMode") === "true" } catch { return false }
   })
+  const [readingFont, setReadingFont] = useState(() => {
+    try { return localStorage.getItem("readingFont") || "georgia" } catch { return "georgia" }
+  })
+  const [fontSizePx, setFontSizePx] = useState(() => {
+    try { return parseInt(localStorage.getItem("readerFontSize")) || 20 } catch { return 20 }
+  })
+
+  const fontRef = useRef(readingFont)
+  useEffect(() => { fontRef.current = readingFont }, [readingFont])
+  const sizeRef = useRef(fontSizePx)
+  useEffect(() => { sizeRef.current = fontSizePx }, [fontSizePx])
 
   const offsetStack = useRef([])
   const readerRef = useRef(null)
@@ -72,6 +83,23 @@ function ReaderPage() {
     })
   }
 
+  function handleFontChange(font) {
+    setReadingFont(font)
+    try { localStorage.setItem("readingFont", font) } catch {}
+  }
+
+  function handleFontSizeDown() {
+    const px = Math.max(16, fontSizePx - 1)
+    setFontSizePx(px)
+    try { localStorage.setItem("readerFontSize", px) } catch {}
+  }
+
+  function handleFontSizeUp() {
+    const px = Math.min(35, fontSizePx + 1)
+    setFontSizePx(px)
+    try { localStorage.setItem("readerFontSize", px) } catch {}
+  }
+
   useEffect(() => {
     const colors = { default:"#fff", calm:"#EDE3CF", paper:"#D8D5CE" }
     const bg = nightMode ? "#1E1E1E" : (colors[readingTheme] || "#fff")
@@ -86,12 +114,17 @@ function ReaderPage() {
     }
   }, [readingTheme, nightMode])
 
+  useEffect(() => {
+    if (book) loadPage(book, currentOffset)
+  }, [readingFont, fontSizePx])
+
   const loadPage = useCallback((bookData, fromChar) => {
     const el = readerRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
     const height = Math.round(rect.height)
-    const content = getPageContent(bookData, fromChar, height)
+    const px = sizeRef.current
+    const content = getPageContent(bookData, fromChar, height, fontRef.current, px + "px", Math.round(px * 1.45) + "px")
     setPageItems(content.items)
     setCurrentOffset(fromChar)
     setNextOffset(content.nextChar)
@@ -262,7 +295,7 @@ function ReaderPage() {
         </button>
       </div>
 
-      <div className="reader-content" ref={readerRef}>
+      <div className={`reader-content ${readingFont}`} style={{ "--fs": fontSizePx + "px", "--lh": Math.round(fontSizePx * 1.45) + "px" }} ref={readerRef}>
         <div className="reader-page-anim" style={{
           transform: pageTransform,
           opacity: isAnimating ? 0 : 1,
@@ -288,12 +321,17 @@ function ReaderPage() {
             <button className="reader-settings-close" onClick={() => setSettingsOpen(false)} onTouchStart={stopTouch}>
               ✕
             </button>
-            <h3 className="reader-settings-title">Reading Settings</h3>
+            <h3 className="reader-settings-title">Настройки чтения</h3>
+            <div className="reader-size-control">
+              <button className="reader-size-btn" onClick={handleFontSizeDown} disabled={fontSizePx <= 16}>−</button>
+              <span className="reader-size-value">{fontSizePx}px</span>
+              <button className="reader-size-btn" onClick={handleFontSizeUp} disabled={fontSizePx >= 35}>+</button>
+            </div>
             <div className="reader-theme-row">
               {[
-                { id:"default", bg:"#FFFFFF", color:"#111111", name:"Default" },
-                { id:"calm",    bg:"#EDE3CF", color:"#333333", name:"Calm" },
-                { id:"paper",   bg:"#F4F4F0", color:"#333333", name:"Paper" },
+                { id:"default", bg:"#FFFFFF", color:"#111111", name:"Обычная" },
+                { id:"calm",    bg:"#EDE3CF", color:"#333333", name:"Спокойная" },
+                { id:"paper",   bg:"#F4F4F0", color:"#333333", name:"Бумага" },
               ].map((t) => (
                 <button
                   key={t.id}
@@ -303,6 +341,22 @@ function ReaderPage() {
                 >
                   <span className="reader-theme-aa" style={{ color: t.color }}>Aa</span>
                   <span className="reader-theme-name">{t.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className="reader-font-label">Шрифт</p>
+            <div className="reader-font-row">
+              {[
+                { id:"georgia", name:"Georgia" },
+                { id:"ebGaramond", name:"EB Garamond" },
+                { id:"arial", name:"Arial" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  className={`reader-font-btn${readingFont === f.id ? " reader-font-btn--active" : ""}`}
+                  onClick={() => handleFontChange(f.id)}
+                >
+                  {f.name}
                 </button>
               ))}
             </div>
