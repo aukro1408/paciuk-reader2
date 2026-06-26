@@ -1,5 +1,6 @@
 import { Home, Plus, Settings } from "lucide-react"
 import { useRef } from "react"
+import JSZip from "jszip"
 import { parseFb2 } from "../parser/fb2Parser"
 import { saveBook } from "../storage/booksDB"
 
@@ -14,9 +15,24 @@ function BottomNav() {
     const file = e.target.files?.[0]
     if (file) {
       try {
-        const book = await parseFb2(file)
-        await saveBook(book)
-        console.log("book saved")
+        if (file.name.endsWith(".zip")) {
+          const zip = await JSZip.loadAsync(file)
+          const fb2Entry = Object.keys(zip.files).find(
+            (name) => name.endsWith(".fb2") && !zip.files[name].dir
+          )
+          if (!fb2Entry) {
+            alert("Архив не содержит FB2 книгу")
+            return
+          }
+          const text = await zip.files[fb2Entry].async("text")
+          const book = await parseFb2(text, fb2Entry)
+          await saveBook(book)
+          console.log("book saved from zip")
+        } else {
+          const book = await parseFb2(file)
+          await saveBook(book)
+          console.log("book saved")
+        }
       } catch (err) {
         console.error("FB2 parsing failed", err)
       }
@@ -37,7 +53,7 @@ function BottomNav() {
       </button>
       <input
         type="file"
-        accept=".fb2"
+        accept=".fb2,.zip"
         ref={fileInputRef}
         onChange={handleFileChange}
         hidden

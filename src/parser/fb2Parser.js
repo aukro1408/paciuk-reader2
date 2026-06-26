@@ -89,8 +89,14 @@ function parseSection(section, depth = 0) {
   return chapters;
 }
 
-export async function parseFb2(file) {
-  const text = await file.text();
+export async function parseFb2(input, filename) {
+  let text;
+  if (typeof input === "string") {
+    text = input;
+  } else {
+    text = await input.text();
+    if (!filename) filename = input.name;
+  }
 
   const parser = new DOMParser();
 
@@ -107,7 +113,7 @@ export async function parseFb2(file) {
 
   const title =
     titleEl?.textContent?.trim() ||
-    file.name.replace(".fb2", "");
+    filename.replace(/\.fb2$/i, "");
 
   // Authors
   const authorEls = xmlDoc.querySelectorAll("title-info > author");
