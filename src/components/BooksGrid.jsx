@@ -22,10 +22,28 @@ function BooksGrid() {
   const navigate = useNavigate()
   const [books, setBooks] = useState([])
   const [ready, setReady] = useState(false)
+  const [progressMap, setProgressMap] = useState({})
 
   useEffect(() => {
     getAllBooks().then((all) => {
-      setBooks(all.filter((b) => !b.hidden))
+      const visible = all.filter((b) => !b.hidden)
+      setBooks(visible)
+      // Load reading progress from localStorage for each book
+      const map = {}
+      visible.forEach((book) => {
+        try {
+          const raw = localStorage.getItem(`reading_progress_${book.id}`)
+          if (raw) {
+            const saved = JSON.parse(raw)
+            if (saved.currentPage && saved.totalPages) {
+              map[book.id] = Math.round((saved.currentPage / saved.totalPages) * 100)
+            }
+          }
+        } catch {
+          // ignore invalid data
+        }
+      })
+      setProgressMap(map)
       setReady(true)
     })
   }, [])
@@ -61,8 +79,24 @@ function BooksGrid() {
                   : { background: fallbackGradient(book.id) }
               }
             >
-              {book.progress > 0 && (
-                <div className="book-card-badge">{book.progress}%</div>
+              {progressMap[book.id] > 0 && (
+                <div className="book-card-progress">
+                  <svg width="28" height="28" viewBox="0 0 28 28">
+                    <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
+                    <circle
+                      cx="14"
+                      cy="14"
+                      r="11"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeDasharray={`${(progressMap[book.id] / 100) * 69} 69`}
+                      strokeLinecap="round"
+                      transform="rotate(-90 14 14)"
+                    />
+                  </svg>
+                  <span className="book-card-progress-text">{progressMap[book.id]}%</span>
+                </div>
               )}
             </div>
             <BookMenu book={book} onHide={handleHide} onDelete={handleDelete} />

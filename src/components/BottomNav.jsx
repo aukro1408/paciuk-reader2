@@ -1,11 +1,23 @@
 import { Home, Plus, Settings } from "lucide-react"
 import { useRef } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import JSZip from "jszip"
 import { parseFb2 } from "../parser/fb2Parser"
 import { saveBook } from "../storage/booksDB"
 
 function BottomNav() {
   const fileInputRef = useRef(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  function handleHomeClick() {
+    if (location.pathname === "/") {
+      window.dispatchEvent(new Event("home-refresh"))
+    } else {
+      navigate("/")
+      window.dispatchEvent(new Event("home-refresh"))
+    }
+  }
 
   function handlePlusClick() {
     fileInputRef.current?.click()
@@ -42,7 +54,7 @@ function BottomNav() {
 
   return (
     <nav className="bottom-nav">
-      <button className="bottom-nav-btn">
+      <button className="bottom-nav-btn" onClick={handleHomeClick}>
         <Home size={30} />
       </button>
       <button className="bottom-nav-btn bottom-nav-btn--center" onClick={handlePlusClick}>
