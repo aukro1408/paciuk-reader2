@@ -493,6 +493,7 @@ p{
 
 .book-card{
   border-radius:22px;
+  overflow:hidden;
   position:relative;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
@@ -782,7 +783,7 @@ p{
 
 .book-page-cover-section{
   position:relative;
-  height:320px;
+  height:55dvh;
   width:100%;
   background-size:cover;
   background-position:center;
@@ -847,29 +848,33 @@ p{
 
 .book-page-cover-wrapper{
   position:relative;
-  z-index:1;
+  z-index:10;
+  transform:translateY(35px);
 }
 
 .book-page-cover-img{
-  width:140px;
-  height:200px;
+  width:200px;
+  height:286px;
   border-radius:18px;
   box-shadow:0 8px 32px rgba(0,0,0,0.3);
 }
 
 .book-page-info{
   padding:24px;
-  margin-top:-20px;
+  margin-top:-10dvh;
   position:relative;
   z-index:2;
   text-align:center;
+  background:white;
+  border-top-left-radius:56px;
+  border-top-right-radius:56px;
 }
 
 .book-page-title{
   font-size:26px;
   font-weight:700;
   color:#1a1a1a;
-  margin:0;
+  margin:25px 0 0 0;
   line-height:1.2;
   text-align:center;
 }
