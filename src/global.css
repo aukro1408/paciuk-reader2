@@ -492,7 +492,6 @@ p{
 }
 
 .book-card{
-  border-radius:22px;
   overflow:hidden;
   position:relative;
   cursor:pointer;

@@ -21,10 +21,16 @@ function fallbackGradient(id) {
 function BooksGrid() {
   const navigate = useNavigate()
   const [books, setBooks] = useState([])
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    getAllBooks().then((all) => setBooks(all.filter((b) => !b.hidden)))
+    getAllBooks().then((all) => {
+      setBooks(all.filter((b) => !b.hidden))
+      setReady(true)
+    })
   }, [])
+
+  if (!ready) return null
 
   function handleHide(book) {
     saveBook({ ...book, hidden: true }).then(() => {

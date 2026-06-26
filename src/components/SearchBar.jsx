@@ -14,7 +14,7 @@ function SearchBar() {
   const ref = useRef(null)
 
   useEffect(() => {
-    getAllBooks().then(setBooks)
+    getAllBooks().then((all) => setBooks(all.filter((b) => !b.hidden)))
   }, [])
 
   useEffect(() => {
