@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { getAllBooks, saveBook } from "../storage/booksDB"
 import { getPageContent, getTotalChars } from "../engine/pagination"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Moon } from "lucide-react"
 
 function renderParagraph(para, i) {
   switch (para.type) {
@@ -73,7 +73,7 @@ function ReaderPage() {
   }
 
   useEffect(() => {
-    const colors = { default:"#fff", calm:"#EDE3CF", paper:"#F4F4F0" }
+    const colors = { default:"#fff", calm:"#EDE3CF", paper:"#D8D5CE" }
     const bg = nightMode ? "#1E1E1E" : (colors[readingTheme] || "#fff")
     const root = document.getElementById("root")
     if (root) root.style.background = bg
@@ -247,7 +247,7 @@ function ReaderPage() {
     : 'transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease'
 
   return (
-    <div className={`reader-page ${readingTheme}`}
+    <div className={`reader-page ${readingTheme}${nightMode ? " night-mode" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -282,6 +282,9 @@ function ReaderPage() {
       {settingsOpen && (
         <div className="reader-settings-overlay" onClick={() => setSettingsOpen(false)} onTouchStart={stopTouch} onTouchEnd={stopTouch}>
           <div className="reader-settings-sheet" onClick={(e) => e.stopPropagation()} onTouchStart={stopTouch} onTouchEnd={stopTouch}>
+            <button className={`reader-night-toggle${nightMode ? " reader-night-toggle--active" : ""}`} onClick={handleNightToggle} onTouchStart={stopTouch}>
+              <Moon size={20} />
+            </button>
             <button className="reader-settings-close" onClick={() => setSettingsOpen(false)} onTouchStart={stopTouch}>
               ✕
             </button>

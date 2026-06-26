@@ -1074,6 +1074,32 @@ p{
   background:#e0e0e0;
 }
 
+.reader-night-toggle{
+  position:absolute;
+  top:12px;
+  right:64px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:none;
+  background:#f2f2f2;
+  color:#555;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.reader-night-toggle:active{
+  background:#e0e0e0;
+}
+
+.reader-night-toggle--active{
+  background:#2B2B2B;
+  color:#F5F5F5;
+}
+
 .reader-settings-title{
   font-size:18px;
   font-weight:700;
@@ -1258,7 +1284,7 @@ p{
 }
 
 .reader-page.paper{
-  background:#F4F4F0;
+  background:radial-gradient(circle at center,#E3E0D9 0%,#DFDCD4 70%,#D8D5CE 100%);
 }
 
 .reader-page.paper .reader-content,
@@ -1269,6 +1295,84 @@ p{
 .reader-page.paper .reader-para-epigraph,
 .reader-page.paper .reader-para-poem{
   color:#2A2A2A;
+}
+
+.reader-page.night-mode{
+  background:#1E1E1E;
+}
+
+.reader-page.night-mode .reader-header{
+  background:#1E1E1E;
+  border-bottom-color:#333;
+}
+
+.reader-page.night-mode .reader-header-title{
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-back{
+  background:#333;
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-settings-btn{
+  background:#333;
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-content,
+.reader-page.night-mode .reader-para-p,
+.reader-page.night-mode .reader-para-title,
+.reader-page.night-mode .reader-para-subtitle,
+.reader-page.night-mode .reader-para-cite,
+.reader-page.night-mode .reader-para-epigraph,
+.reader-page.night-mode .reader-para-poem,
+.reader-page.night-mode .reader-chapter-title{
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-para-cite{
+  border-left-color:#555;
+}
+
+.reader-page.night-mode .reader-bottom-panel{
+  background:#1E1E1E;
+  border-top-color:#333;
+}
+
+.reader-page.night-mode .reader-bottom-progress-bar{
+  background:#444;
+}
+
+.reader-page.night-mode .reader-settings-sheet{
+  background:#2B2B2B;
+}
+
+.reader-page.night-mode .reader-settings-title{
+  color:#F5F5F5;
+}
+
+.reader-page.night-mode .reader-settings-close{
+  background:#444;
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-settings-close:active{
+  background:#555;
+}
+
+.reader-page.night-mode .reader-night-toggle{
+  background:#444;
+  color:#D4D4D4;
+}
+
+.reader-page.night-mode .reader-night-toggle--active{
+  background:#3D3D3D;
+  color:#F5F5F5;
+}
+
+.reader-page.night-mode .reader-theme-name{
+  color:#999;
 }
 
 .reader-theme-row{
