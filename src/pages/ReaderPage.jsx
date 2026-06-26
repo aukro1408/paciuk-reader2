@@ -41,12 +41,50 @@ function ReaderPage() {
   const [animDirection, setAnimDirection] = useState(null)
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [readingTheme, setReadingTheme] = useState(() => {
+    try { return localStorage.getItem("readingTheme") || "default" } catch { return "default" }
+  })
+  const [nightMode, setNightMode] = useState(() => {
+    try { return localStorage.getItem("nightMode") === "true" } catch { return false }
+  })
 
   const offsetStack = useRef([])
   const readerRef = useRef(null)
   const touchX = useRef(null)
   const touchStartX = useRef(null)
   const charsPerPageRef = useRef(0)
+
+  function stopTouch(e) {
+    e.stopPropagation()
+  }
+
+  function handleThemeChange(theme) {
+    setReadingTheme(theme)
+    try { localStorage.setItem("readingTheme", theme) } catch {}
+  }
+
+  function handleNightToggle() {
+    setNightMode((v) => {
+      const next = !v
+      try { localStorage.setItem("nightMode", next) } catch {}
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const colors = { default:"#fff", calm:"#EDE3CF", paper:"#F4F4F0" }
+    const bg = nightMode ? "#1E1E1E" : (colors[readingTheme] || "#fff")
+    const root = document.getElementById("root")
+    if (root) root.style.background = bg
+    document.body.style.background = bg
+    document.documentElement.style.background = bg
+    return () => {
+      if (root) root.style.background = ""
+      document.body.style.background = ""
+      document.documentElement.style.background = ""
+    }
+  }, [readingTheme, nightMode])
 
   const loadPage = useCallback((bookData, fromChar) => {
     const el = readerRef.current
@@ -150,6 +188,7 @@ function ReaderPage() {
   }, [isAnimating, goNext, goPrev])
 
   function handleTouchStart(e) {
+    if (settingsOpen) return
     touchX.current = e.touches[0].clientX
     touchStartX.current = e.touches[0].clientX
     setDragX(0)
@@ -157,12 +196,14 @@ function ReaderPage() {
   }
 
   function handleTouchMove(e) {
+    if (settingsOpen) return
     if (!touchStartX.current) return
     const currentX = e.touches[0].clientX
     setDragX(currentX - touchStartX.current)
   }
 
   function handleTouchEnd(e) {
+    if (settingsOpen) return
     const endX = e.changedTouches[0].clientX
     const dx = endX - touchX.current
     const startX = touchStartX.current
@@ -195,10 +236,6 @@ function ReaderPage() {
     )
   }
 
-  const cpp = charsPerPageRef.current || totalChars
-  const currentPageNum = cpp > 0 ? Math.floor(currentOffset / cpp) + 1 : 1
-  const totalPagesNum = cpp > 0 ? Math.max(1, Math.ceil(totalChars / cpp)) : 1
-
   const pageTransform = isAnimating
     ? `translateX(${animDirection === 'left' ? -40 : 40}px) scale(0.97)`
     : isDragging
@@ -210,7 +247,7 @@ function ReaderPage() {
     : 'transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease'
 
   return (
-    <div className="reader-page"
+    <div className={`reader-page ${readingTheme}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -220,6 +257,9 @@ function ReaderPage() {
           <ArrowLeft size={24} />
         </button>
         <p className="reader-header-title">{book.title}</p>
+        <button className="reader-settings-btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSettingsOpen(true); }} onTouchStart={stopTouch} onTouchEnd={stopTouch}>
+          Aa
+        </button>
       </div>
 
       <div className="reader-content" ref={readerRef}>
@@ -236,8 +276,36 @@ function ReaderPage() {
         <div className="reader-bottom-progress-bar">
           <div className="reader-bottom-progress-fill" style={{ width: `${(currentOffset / totalChars) * 100}%` }} />
         </div>
-        <p className="reader-bottom-text">Страница {currentPageNum} из {totalPagesNum}</p>
+        <p className="reader-bottom-text">{Math.round((currentOffset / totalChars) * 100)}%</p>
       </div>
+
+      {settingsOpen && (
+        <div className="reader-settings-overlay" onClick={() => setSettingsOpen(false)} onTouchStart={stopTouch} onTouchEnd={stopTouch}>
+          <div className="reader-settings-sheet" onClick={(e) => e.stopPropagation()} onTouchStart={stopTouch} onTouchEnd={stopTouch}>
+            <button className="reader-settings-close" onClick={() => setSettingsOpen(false)} onTouchStart={stopTouch}>
+              ✕
+            </button>
+            <h3 className="reader-settings-title">Reading Settings</h3>
+            <div className="reader-theme-row">
+              {[
+                { id:"default", bg:"#FFFFFF", color:"#111111", name:"Default" },
+                { id:"calm",    bg:"#EDE3CF", color:"#333333", name:"Calm" },
+                { id:"paper",   bg:"#F4F4F0", color:"#333333", name:"Paper" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  className={`reader-theme-card${readingTheme === t.id ? " reader-theme-card--active" : ""}`}
+                  onClick={() => handleThemeChange(t.id)}
+                  style={{ background: t.bg }}
+                >
+                  <span className="reader-theme-aa" style={{ color: t.color }}>Aa</span>
+                  <span className="reader-theme-name">{t.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
