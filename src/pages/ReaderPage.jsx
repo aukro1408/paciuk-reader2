@@ -115,6 +115,26 @@ function ReaderPage() {
   }, [readingTheme, nightMode])
 
   useEffect(() => {
+    let wakeLock = null
+
+    async function acquire() {
+      const enabled = localStorage.getItem("reader_keep_awake") === "true"
+      if (!enabled) return
+      try {
+        wakeLock = await navigator.wakeLock.request("screen")
+      } catch {}
+    }
+
+    acquire()
+
+    return () => {
+      if (wakeLock) {
+        wakeLock.release().catch(() => {})
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     if (book) loadPage(book, currentOffset)
   }, [readingFont, fontSizePx])
 

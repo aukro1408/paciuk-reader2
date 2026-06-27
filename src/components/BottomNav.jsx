@@ -60,7 +60,7 @@ function BottomNav() {
       <button className="bottom-nav-btn bottom-nav-btn--center" onClick={handlePlusClick}>
         <Plus size={25} />
       </button>
-      <button className="bottom-nav-btn">
+      <button className="bottom-nav-btn" onClick={() => navigate("/settings")}>
         <Settings size={30} />
       </button>
       <input
