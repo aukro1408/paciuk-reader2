@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAllBooks } from "../storage/booksDB"
+import { getTotalChars } from "../engine/pagination"
 import { ArrowLeft } from "lucide-react"
 
 function BookPage() {
@@ -26,6 +27,10 @@ function BookPage() {
       setSavedProgress(null)
     }
   }, [book, id])
+
+  const CHARS_PER_PAGE = 300
+  const totalChars = book ? getTotalChars(book) : 0
+  const estimatedPages = Math.max(1, Math.ceil(totalChars / CHARS_PER_PAGE))
 
   const progressPercent = savedProgress
     ? Math.round((savedProgress.currentPage / savedProgress.totalPages) * 100)
@@ -68,7 +73,7 @@ function BookPage() {
       <div className="book-page-info">
         <h1 className="book-page-title">{book.title}</h1>
         <p className="book-page-author">{book.authors?.[0] || ""}</p>
-        <span className="book-page-pages">398 стр</span>
+        <span className="book-page-pages">{estimatedPages} стр</span>
 
         <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`, { state: { startPage } })}>Продолжить чтение</button>
 
