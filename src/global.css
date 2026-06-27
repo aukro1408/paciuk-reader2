@@ -1,3 +1,12 @@
+@font-face {
+  font-family: 'Merriweather';
+  src: url('./assets/fonts/Merriweather-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Literata';
+  src: url('./assets/fonts/Literata-Regular.ttf') format('truetype');
+}
+
 *{
   margin:0;
   padding:0;
@@ -1511,13 +1520,19 @@ p{
   letter-spacing:0;
 }
 
-.reader-content.ebGaramond{
-  font-family:'EB Garamond','Garamond',serif;
+.reader-content.literata{
+  font-family:'Literata',Georgia,serif;
 }
-.reader-content.ebGaramond .reader-para-p{
+.reader-content.literata .reader-para-p{
   letter-spacing:0;
 }
 
+.reader-content.merriweather{
+  font-family:'Merriweather',Georgia,serif;
+}
+.reader-content.merriweather .reader-para-p{
+  letter-spacing:0;
+}
 .reader-content.arial{
   font-family:Arial,'Helvetica Neue',sans-serif;
 }

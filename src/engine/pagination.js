@@ -1,7 +1,7 @@
 const FONT_MAP = {
   georgia: "'Georgia','Times New Roman',serif",
-  ebGaramond: "'EB Garamond','Garamond',serif",
-  arial: "Arial,'Helvetica Neue',sans-serif",
+  literata: "'Literata',Georgia,serif",
+  merriweather: "'Merriweather',Georgia,serif",
 }
 
 const STYLES = {

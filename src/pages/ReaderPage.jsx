@@ -368,8 +368,8 @@ function ReaderPage() {
             <div className="reader-font-row">
               {[
                 { id:"georgia", name:"Georgia" },
-                { id:"ebGaramond", name:"EB Garamond" },
-                { id:"arial", name:"Arial" },
+                { id:"literata", name:"Literata" },
+                { id:"merriweather", name:"Merriweather" },
               ].map((f) => (
                 <button
                   key={f.id}
