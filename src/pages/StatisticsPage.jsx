@@ -208,7 +208,7 @@ function StatisticsPage() {
       </div>
       <div className="stats-test-card">
         <div className="stats-test-card-inner">
-          <div className="stats-test-label">СЕГОДНЯ</div>
+          <div className="stats-test-label">ЧТЕНИЕ СЕГОДНЯ</div>
           <div className="stats-test-row">{todayMinutes} мин</div>
         </div>
         <div className="stats-dots">

@@ -573,7 +573,7 @@ p{
 .book-card-badge{
   position:absolute;
   top:8px;
-  left:40%;
+  left:calc(42% + 10px);
   transform:translateX(-50%);
   z-index:5;
   padding:4px 10px;
@@ -610,27 +610,16 @@ p{
 
 .book-card-menu-btn{
   position:absolute;
-  top:4px;
-  right:4px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
+  top:8px;
+  right:6px;
   border:none;
-  background:rgba(0,0,0,0.35);
+  background:none;
   color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
   cursor:pointer;
   z-index:5;
   font-size:18px;
   line-height:1;
   -webkit-tap-highlight-color:transparent;
-  transition:background 0.15s ease;
-}
-
-.book-card-menu-btn:active{
-  background:rgba(0,0,0,0.55);
 }
 
 .book-menu-backdrop{
@@ -1873,11 +1862,12 @@ p{
 }
 
 .stats-title{
-  font-size:32px;
-  font-weight:700;
+  font-size:26px;
+  font-weight:600;
   color:#fff;
   margin:0;
   margin-left:16px;
+  letter-spacing:-0.5px;
 }
 
 .stats-test-card,
@@ -2125,21 +2115,21 @@ p{
   align-items:center;
   gap:6px;
 }
-
 .stats-dot{
   width:8px;
   height:8px;
   border-radius:50%;
-  background:rgba(255,255,255,0.25);
+  background:rgba(255,255,255,0.4);
   box-shadow:0 0 6px rgba(255,255,255,0.15);
   animation:statsDotPulse 2s ease-in-out infinite;
 }
 
 
 
+
 @keyframes statsDotPulse{
-  0%,100%{ opacity:0.4; transform:scale(0.85); }
-  50%{ opacity:1; transform:scale(1.15); }
+  0%,100%{ opacity:0.6; background:rgba(255,255,255,0.4); transform:scale(0.85); }
+  50%{ opacity:1; background:rgba(255,255,255,0.9); box-shadow:0 0 8px rgba(255,255,255,0.35); transform:scale(1.15); }
 }
 
 .stats-goal-card{

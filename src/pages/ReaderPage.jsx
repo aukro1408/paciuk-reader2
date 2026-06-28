@@ -389,7 +389,7 @@ function ReaderPage() {
         <div className="reader-bottom-progress-bar">
           <div className="reader-bottom-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        <p className="reader-bottom-text">{progressPercent}% read</p>
+        <p className="reader-bottom-text">{progressPercent}% осилено</p>
       </div>
 
       {settingsOpen && (
