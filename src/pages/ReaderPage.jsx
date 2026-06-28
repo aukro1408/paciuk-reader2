@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { getAllBooks, saveBook } from "../storage/booksDB"
+import { getAllBooks, saveBook, getStats, saveStats } from "../storage/booksDB"
 import { getPageContent, getTotalChars } from "../engine/pagination"
 import { ArrowLeft, Moon } from "lucide-react"
 
@@ -65,6 +65,48 @@ function ReaderPage() {
   const touchX = useRef(null)
   const touchStartX = useRef(null)
   const charsPerPageRef = useRef(0)
+  const sessionStartRef = useRef(null)
+  const completedTrackedRef = useRef(false)
+
+  useEffect(() => {
+    getStats()
+      .catch(() => null)
+      .then((s) => {
+      const now = new Date()
+      const today = now.toISOString().slice(0, 10)
+
+      const stats = s || { id: "globalStats", todayMinutes: 0, totalMinutes: 0, lastReadDate: null }
+      if (stats.todayMinutes === undefined) stats.todayMinutes = 0
+      if (stats.totalMinutes === undefined) stats.totalMinutes = 0
+
+      if (stats.lastReadDate !== today) {
+        stats.todayMinutes = 0
+      }
+
+      stats.lastReadDate = today
+      saveStats(stats).catch(() => {})
+    })
+  }, [])
+
+  useEffect(() => {
+    sessionStartRef.current = Date.now()
+
+    return () => {
+      const elapsed = Math.round((Date.now() - sessionStartRef.current) / 60000)
+      if (elapsed < 1) return
+
+      getStats().then((s) => {
+        const stats = s || { id: "globalStats", todayMinutes: 0, totalMinutes: 0, lastReadDate: null }
+        stats.todayMinutes += elapsed
+        stats.totalMinutes += elapsed
+        stats.lastReadDate = new Date().toISOString().slice(0, 10)
+        if (!stats.weeklyReading) stats.weeklyReading = { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 }
+        const weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+        stats.weeklyReading[weekdays[new Date().getDay()]] = stats.todayMinutes
+        saveStats(stats)
+      })
+    }
+  }, [])
 
   function stopTouch(e) {
     e.stopPropagation()
@@ -212,6 +254,22 @@ function ReaderPage() {
     try {
       localStorage.setItem(`reading_progress_${id}`, JSON.stringify({ currentPage: page, totalPages }))
     } catch {}
+
+    const percent = Math.round((currentOffset / totalChars) * 100)
+    if (percent >= 99 && !book.completedTracked && !completedTrackedRef.current) {
+      completedTrackedRef.current = true
+      getAllBooks().then((books) => {
+        const dbBook = books.find((b) => b.id === id)
+        if (dbBook && !dbBook.completedTracked) {
+          saveBook({ ...dbBook, completedTracked: true })
+          getStats().then((s) => {
+            const stats = s || { id: "globalStats", todayMinutes: 0, totalMinutes: 0, lastReadDate: null }
+            stats.completedBooks = (stats.completedBooks || 0) + 1
+            saveStats(stats)
+          })
+        }
+      })
+    }
   }, [currentOffset, book, id, totalChars])
 
   const goNext = useCallback(() => {

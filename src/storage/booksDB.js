@@ -1,6 +1,7 @@
 const DB_NAME = "AtlasReaderDB"
 const STORE_NAME = "books"
-const DB_VERSION = 1
+const STATS_STORE = "stats"
+const DB_VERSION = 2
 
 let db = null
 
@@ -12,6 +13,9 @@ function openDB() {
       const database = e.target.result
       if (!database.objectStoreNames.contains(STORE_NAME)) {
         database.createObjectStore(STORE_NAME, { keyPath: "id" })
+      }
+      if (!database.objectStoreNames.contains(STATS_STORE)) {
+        database.createObjectStore(STATS_STORE, { keyPath: "id" })
       }
     }
 
@@ -66,5 +70,35 @@ export async function deleteBook(id) {
 
     request.onsuccess = () => resolve()
     request.onerror = () => reject(new Error("Failed to delete book"))
+  })
+}
+
+export async function getStats() {
+  if (!db) await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STATS_STORE, "readonly")
+    const store = tx.objectStore(STATS_STORE)
+    const request = store.get("globalStats")
+
+    request.onsuccess = () => {
+      if (request.result) {
+        resolve(request.result)
+      } else {
+        resolve(null)
+      }
+    }
+    request.onerror = () => reject(new Error("Failed to get stats"))
+  })
+}
+
+export async function saveStats(stats) {
+  if (!db) await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STATS_STORE, "readwrite")
+    const store = tx.objectStore(STATS_STORE)
+    const request = store.put(stats)
+
+    request.onsuccess = () => resolve()
+    request.onerror = () => reject(new Error("Failed to save stats"))
   })
 }
