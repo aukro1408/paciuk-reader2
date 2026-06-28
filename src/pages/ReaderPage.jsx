@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { getAllBooks, saveBook, getStats, saveStats } from "../storage/booksDB"
 import { getPageContent, getTotalChars } from "../engine/pagination"
 import { ArrowLeft, Moon } from "lucide-react"
@@ -30,7 +30,6 @@ function renderParagraph(para, i) {
 function ReaderPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
   const [book, setBook] = useState(null)
   const [pageItems, setPageItems] = useState([])
   const [currentOffset, setCurrentOffset] = useState(0)
@@ -64,7 +63,6 @@ function ReaderPage() {
   const readerRef = useRef(null)
   const touchX = useRef(null)
   const touchStartX = useRef(null)
-  const charsPerPageRef = useRef(0)
   const sessionStartRef = useRef(null)
   const completedTrackedRef = useRef(false)
 
@@ -190,9 +188,29 @@ function ReaderPage() {
     setPageItems(content.items)
     setCurrentOffset(fromChar)
     setNextOffset(content.nextChar)
-    const consumed = content.nextChar - fromChar
-    if (consumed > 0) charsPerPageRef.current = consumed
+  }, [])
 
+  const buildOffsetStack = useCallback((bookData, targetOffset) => {
+    const el = readerRef.current
+    if (!el || targetOffset <= 0) return []
+    const rect = el.getBoundingClientRect()
+    const height = Math.round(rect.height)
+    const px = sizeRef.current
+    const stack = []
+    let offset = 0
+
+    while (offset < targetOffset) {
+      const content = getPageContent(bookData, offset, height, fontRef.current, px + "px", Math.round(px * 1.45) + "px")
+      if (content.nextChar <= offset) break
+      if (content.nextChar >= targetOffset) {
+        stack.push(offset)
+        break
+      }
+      stack.push(offset)
+      offset = content.nextChar
+    }
+
+    return stack
   }, [])
 
   useEffect(() => {
@@ -213,46 +231,27 @@ function ReaderPage() {
   useEffect(() => {
     if (!book || !readerRef.current) return
 
-    const navPage = location.state?.startPage
-    if (navPage && navPage > 1 && totalChars > 0) {
-      try {
-        const raw = localStorage.getItem(`reading_progress_${id}`)
-        if (raw) {
-          const { totalPages } = JSON.parse(raw)
-          if (totalPages > 0) {
-            const cpp = totalChars / totalPages
-            const offset = Math.round((navPage - 1) * cpp)
-            loadPage(book, Math.min(offset, totalChars - 1))
-            return
-          }
-        }
-      } catch {}
-    }
-
     try {
       const raw = localStorage.getItem(`reading_progress_${id}`)
       if (raw) {
-        const { currentPage, totalPages } = JSON.parse(raw)
-        if (currentPage > 1 && totalPages > 0 && totalChars > 0) {
-          const cpp = totalChars / totalPages
-          const offset = Math.round((currentPage - 1) * cpp)
-          loadPage(book, Math.min(offset, totalChars - 1))
+        const { currentOffset: savedOffset } = JSON.parse(raw)
+        if (savedOffset > 0 && totalChars > 0) {
+          const offset = Math.min(savedOffset, totalChars - 1)
+          offsetStack.current = buildOffsetStack(book, offset)
+          loadPage(book, offset)
           return
         }
       }
     } catch {}
 
+    offsetStack.current = []
     loadPage(book, 0)
-  }, [book, loadPage, location.state, id, totalChars])
+  }, [book, loadPage, buildOffsetStack, id, totalChars])
 
   useEffect(() => {
     if (!book || totalChars === 0) return
-    const cpp = charsPerPageRef.current
-    if (!cpp) return
-    const page = Math.floor(currentOffset / cpp) + 1
-    const totalPages = Math.max(1, Math.ceil(totalChars / cpp))
     try {
-      localStorage.setItem(`reading_progress_${id}`, JSON.stringify({ currentPage: page, totalPages }))
+      localStorage.setItem(`reading_progress_${id}`, JSON.stringify({ currentOffset }))
     } catch {}
 
     const percent = Math.round((currentOffset / totalChars) * 100)
@@ -356,6 +355,9 @@ function ReaderPage() {
   const pageTransition = isDragging
     ? 'none'
     : 'transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease'
+  const progressPercent = totalChars > 0
+    ? Math.min(100, Math.round((currentOffset / totalChars) * 100))
+    : 0
 
   return (
     <div className={`reader-page ${readingTheme}${nightMode ? " night-mode" : ""}`}
@@ -385,9 +387,9 @@ function ReaderPage() {
 
       <div className={`reader-bottom-panel ${uiVisible ? "" : "reader-bottom-panel--hidden"}`}>
         <div className="reader-bottom-progress-bar">
-          <div className="reader-bottom-progress-fill" style={{ width: `${(currentOffset / totalChars) * 100}%` }} />
+          <div className="reader-bottom-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        <p className="reader-bottom-text">{Math.round((currentOffset / totalChars) * 100)}%</p>
+        <p className="reader-bottom-text">{progressPercent}% read</p>
       </div>
 
       {settingsOpen && (

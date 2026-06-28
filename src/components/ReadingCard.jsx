@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { getAllBooks } from "../storage/booksDB"
+import { getTotalChars } from "../engine/pagination"
 
 function ReadingCard() {
   const navigate = useNavigate()
@@ -25,11 +26,10 @@ function ReadingCard() {
 
   if (!book) return null
 
-  const progressPercent = progress
-    ? Math.round((progress.currentPage / progress.totalPages) * 100)
+  const totalChars = getTotalChars(book)
+  const progressPercent = progress && totalChars > 0
+    ? Math.min(100, Math.round(((progress.currentOffset || 0) / totalChars) * 100))
     : 0
-
-  const startPage = progress?.currentPage || 1
 
   return (
     <div className="reading-card"
@@ -64,7 +64,7 @@ function ReadingCard() {
           <div className="reading-card-bar">
             <div className="reading-card-bar-fill" style={{ width: `${progressPercent}%` }} />
           </div>
-          <button className="reading-card-btn" onClick={() => navigate(`/reader/${book.id}`, { state: { startPage } })}>
+          <button className="reading-card-btn" onClick={() => navigate(`/reader/${book.id}`)}>
             Продолжить чтение
           </button>
         </div>

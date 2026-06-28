@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { getAllBooks, saveBook, deleteBook } from "../storage/booksDB"
+import { getTotalChars } from "../engine/pagination"
 import BookMenu from "./BookMenu"
 
 const gradients = [
@@ -35,8 +36,9 @@ function BooksGrid() {
           const raw = localStorage.getItem(`reading_progress_${book.id}`)
           if (raw) {
             const saved = JSON.parse(raw)
-            if (saved.currentPage && saved.totalPages) {
-              map[book.id] = Math.round((saved.currentPage / saved.totalPages) * 100)
+            const totalChars = getTotalChars(book)
+            if (saved.currentOffset && totalChars > 0) {
+              map[book.id] = Math.min(100, Math.round((saved.currentOffset / totalChars) * 100))
             }
           }
         } catch {

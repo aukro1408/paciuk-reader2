@@ -277,7 +277,6 @@ export async function parseFb2(input, filename) {
     date,
 
     progress: 0,
-    currentPage: 0,
     addedAt: Date.now(),
   };
 }

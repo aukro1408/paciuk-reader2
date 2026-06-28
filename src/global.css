@@ -945,16 +945,6 @@ p{
   text-align:center;
 }
 
-.book-page-pages{
-  display:inline-block;
-  margin-top:12px;
-  font-size:13px;
-  color:#4C78FF;
-  background:#EEF4FF;
-  padding:4px 12px;
-  border-radius:20px;
-}
-
 .book-page-progress{
   margin-top:24px;
   background:white;

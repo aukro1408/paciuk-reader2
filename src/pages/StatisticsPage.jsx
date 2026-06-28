@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { ArrowLeft, RotateCcw } from "lucide-react"
 import bgVideo from "../assets/background/video-test1.mp4"
 import { getStats, getAllBooks, saveStats, deleteBook } from "../storage/booksDB"
+import { getTotalChars } from "../engine/pagination"
 
 function StatisticsPage() {
   const navigate = useNavigate()
@@ -43,9 +44,10 @@ function StatisticsPage() {
           try {
             const raw = localStorage.getItem(`reading_progress_${book.id}`)
             if (raw) {
-              const { currentPage, totalPages } = JSON.parse(raw)
-              if (currentPage && totalPages) {
-                const pct = Math.round((currentPage / totalPages) * 100)
+              const { currentOffset } = JSON.parse(raw)
+              const totalChars = getTotalChars(book)
+              if (currentOffset && totalChars > 0) {
+                const pct = Math.min(100, Math.round((currentOffset / totalChars) * 100))
                 if (pct > 0 && pct < 99) inProgress++
               }
             }

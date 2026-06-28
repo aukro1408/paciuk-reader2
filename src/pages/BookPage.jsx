@@ -28,14 +28,11 @@ function BookPage() {
     }
   }, [book, id])
 
-  const CHARS_PER_PAGE = 300
   const totalChars = book ? getTotalChars(book) : 0
-  const estimatedPages = Math.max(1, Math.ceil(totalChars / CHARS_PER_PAGE))
 
-  const progressPercent = savedProgress
-    ? Math.round((savedProgress.currentPage / savedProgress.totalPages) * 100)
+  const progressPercent = savedProgress && totalChars > 0
+    ? Math.min(100, Math.round(((savedProgress.currentOffset || 0) / totalChars) * 100))
     : 0
-  const startPage = savedProgress?.currentPage || 1
 
   if (!book) {
     return (
@@ -73,9 +70,8 @@ function BookPage() {
       <div className="book-page-info">
         <h1 className="book-page-title">{book.title}</h1>
         <p className="book-page-author">{book.authors?.[0] || ""}</p>
-        <span className="book-page-pages">{estimatedPages} стр</span>
 
-        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`, { state: { startPage } })}>Продолжить чтение</button>
+        <button className="book-page-btn" onClick={() => navigate(`/reader/${id}`)}>Продолжить чтение</button>
 
         <div className="book-page-progress">
           <div className="book-page-progress-left">
