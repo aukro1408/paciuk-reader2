@@ -162,7 +162,7 @@ function ReaderPage() {
         setTotalChars(total)
         localStorage.setItem("lastOpenedBookId", id)
         if (!found.hasStartedReading) {
-          saveBook({ ...found, hasStartedReading: true })
+          saveBook({ ...found, hasStartedReading: true, isNew: false })
         }
       }
     })

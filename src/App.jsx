@@ -4,6 +4,7 @@ import Library from './pages/Library'
 import BookPage from './pages/BookPage'
 import ReaderPage from './pages/ReaderPage'
 import SettingsPage from './pages/SettingsPage'
+import StatisticsPage from './pages/StatisticsPage'
 import { initDB } from "./storage/booksDB"
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <Route path="/book/:id" element={<BookPage />} />
       <Route path="/reader/:id" element={<ReaderPage />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/stats" element={<StatisticsPage />} />
     </Routes>
   )
 }

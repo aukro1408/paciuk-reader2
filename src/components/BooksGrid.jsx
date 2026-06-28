@@ -79,6 +79,8 @@ function BooksGrid() {
                   : { background: fallbackGradient(book.id) }
               }
             >
+              {book.isNew && <span className="book-card-badge">НОВИНКА</span>}
+            
               {progressMap[book.id] > 0 && (
                 <div className="book-card-progress">
                   <svg width="28" height="28" viewBox="0 0 28 28">

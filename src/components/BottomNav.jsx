@@ -1,4 +1,4 @@
-import { Home, Plus, Settings } from "lucide-react"
+import { BarChart3, Home, Plus, Settings } from "lucide-react"
 import { useRef } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import JSZip from "jszip"
@@ -38,11 +38,11 @@ function BottomNav() {
           }
           const text = await zip.files[fb2Entry].async("text")
           const book = await parseFb2(text, fb2Entry)
-          await saveBook(book)
+          await saveBook({ ...book, isNew: true })
           console.log("book saved from zip")
         } else {
           const book = await parseFb2(file)
-          await saveBook(book)
+          await saveBook({ ...book, isNew: true })
           console.log("book saved")
         }
       } catch (err) {
@@ -59,6 +59,9 @@ function BottomNav() {
       </button>
       <button className="bottom-nav-btn bottom-nav-btn--center" onClick={handlePlusClick}>
         <Plus size={25} />
+      </button>
+      <button className="bottom-nav-btn" onClick={() => navigate("/stats")}>
+        <BarChart3 size={30} />
       </button>
       <button className="bottom-nav-btn" onClick={() => navigate("/settings")}>
         <Settings size={30} />
